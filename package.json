@@ -12,11 +12,11 @@
 	"license": "NOLICENSE",
 	"private": true,
 	"devDependencies": {
-		"@types/pg": "latest",
+		"@types/sqlite3": "latest",
 		"@types/ws": "latest"
 	},
 	"dependencies": {
-		"pg": "latest",
+		"sqlite3": "latest",
 		"ws": "latest"
 	}
 }
