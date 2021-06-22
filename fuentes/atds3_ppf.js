@@ -36,7 +36,6 @@ function eventoInvalidacacionFichas() {
 }
 
 function eventoConexion(socalo) {
-	console.debug("eventoConexion()");
 	socalo.on("message", function eventoMensaje(mensaje) {
 		if (mensaje.accion === "aportarFicha") {
 			comandoAportarFicha(mensaje);
