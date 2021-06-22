@@ -7,41 +7,43 @@ let temporizadorInvalidacionFichas;
 
 
 function iniciarBaseDatos() {
-	baseDatos.exec("CREATE TABLE IF NOT EXISTS fichas (id INTEGER PRIMARY KEY AUTOINCREMENT, ficha TEXT NOT NULL, expiracion INTEGER NOT NULL)");
-	baseDatos.exec("CREATE UNIQUE INDEX IF NOT EXISTS uniq_fichas_ficha ON fichas (ficha)");
+	baseDatos.exec("CREATE TABLE IF NOT EXISTS fichas (id INTEGER PRIMARY KEY AUTOINCREMENT, ficha TEXT NOT NULL, expiracion INTEGER NOT NULL)", () => {});
+	baseDatos.exec("CREATE UNIQUE INDEX IF NOT EXISTS uniq_fichas_ficha ON fichas (ficha)", () => {});
 	
 	temporizadorInvalidacionFichas = setInterval(eventoInvalidacacionFichas, 60000);
 }
 
 function comandoAportarFicha(mensaje) {
-	try {
-		baseDatos.exec(`INSERT INTO fichas (ficha, expiracion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion})`);
-	} catch (_e) {}
+	baseDatos.exec(`INSERT INTO fichas (ficha, expiracion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion})`, () => {});
 }
 
-function comandoSolicitarrFicha(socalo) {
-	let resultados = baseDatos.exec("SELECT ficha FROM fichas ORDER BY random() LIMIT 1");
-	
-	socalo.send({ accion: "entregarFicha", ficha: resultados["ficha"]});
+function comandoSolicitarFicha(socalo) {
+	baseDatos.get("SELECT ficha FROM fichas ORDER BY random() LIMIT 1", (_error, fila) => {
+		socalo.send(JSON.stringify({ accion: "entregarFicha", ficha: fila.ficha}));
+	});
 }
 
 function eventoInvalidacacionFichas() {
-	baseDatos.exec("DELETE FROM fichas WHERE (datetime('now') >= datetime(expiracion,'unixepoch'))");
-	baseDatos.exec("VACUUM");
+	baseDatos.exec("DELETE FROM fichas WHERE (datetime('now') >= datetime(expiracion,'unixepoch'))", () => {});
+	baseDatos.exec("VACUUM", () => {});
 }
 
 function eventoConexion(socalo) {
 	socalo.estaVivo = true;
 
-	socalo.on("message", function eventoMensaje(mensaje) {
+	socalo.on("message", function eventoMensaje(datos) {
 		try {
+			const mensaje = JSON.parse(datos);
+			
 			if (mensaje.accion === 'aportarFicha') {
 				comandoAportarFicha(mensaje);
 			}
-			if (mensaje.accion === 'solicitarrFicha') {
-				comandoSolicitarrFicha(socalo);
+			if (mensaje.accion === 'solicitarFicha') {
+				comandoSolicitarFicha(socalo);
 			}
-		} catch (_e) {}
+		} catch (e) {
+			console.info(e)
+		}
 	});
 	
 	socalo.on("ping", function ping() {
