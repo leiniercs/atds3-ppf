@@ -37,6 +37,8 @@ function eventoInvalidacacionFichas() {
 }
 
 function eventoConexion(socalo) {
+	socalo.estaVivo = true;
+
 	socalo.on("message", function eventoMensaje(mensaje) {
 		if (mensaje.accion === "aportarFicha") {
 			comandoAportarFicha(mensaje);
@@ -45,6 +47,22 @@ function eventoConexion(socalo) {
 			comandoObtenerFicha(socalo);
 		}
 	});
+	
+	socalo.on("ping", function ping() {
+		socalo.estaVivo = true;
+	});
+	
+	socalo.on("close", function cerrar() {
+		clearInterval(socalo.temporizadorVerificarConexion);
+	})
+	
+	socalo.temporizadorVerificarConexion = setInterval(function verificarConexion() {
+		if (socalo.estaVivo === false) {
+			return socalo.terminate();
+		} else {
+			socalo.estaVivo = false;
+		}
+	}, 20000);
 }
 
 
