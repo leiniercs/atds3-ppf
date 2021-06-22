@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 80 });
+const wss = new WebSocket.Server({ port: 8001 });
 const sqlite3 = require('sqlite3');
 let baseDatos = new sqlite3.Database('atds3_ppf.db');
 let temporizadorInvalidacionFichas;
