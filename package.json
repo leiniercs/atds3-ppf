@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"description": "Administrador de Transferencias para toDus (S3) - Programa Piscina de Fichas",
 	"scripts": {
-		"start": "fuentes/atds3_ppf.js"
+		"start": "NODE_ENV=production /usr/bin/node /app/fuentes/atds3_ppf.js"
 	},
 	"author": {
 		"name": "Leinier Cruz Salfran",
