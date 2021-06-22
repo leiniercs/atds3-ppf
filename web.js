@@ -20,9 +20,9 @@ function iniciarBaseDatos() {
 }
 
 function comandoAportarFicha(mensaje) {
-	if (mensaje["ficha"] !== undefined && mensaje["expiracion"] !== undefined) {
+	try {
 		baseDatos.exec(`INSERT INTO fichas (ficha, expiracion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion})`);
-	}
+	} catch (_e) {}
 }
 
 function comandoObtenerFicha(socalo) {
@@ -40,12 +40,14 @@ function eventoConexion(socalo) {
 	socalo.estaVivo = true;
 
 	socalo.on("message", function eventoMensaje(mensaje) {
-		if (mensaje.accion === "aportarFicha") {
-			comandoAportarFicha(mensaje);
-		}
-		if (mensaje.accion === "obtenerFicha") {
-			comandoObtenerFicha(socalo);
-		}
+		try {
+			if (mensaje.accion === "aportarFicha") {
+				comandoAportarFicha(mensaje);
+			}
+			if (mensaje.accion === "obtenerFicha") {
+				comandoObtenerFicha(socalo);
+			}
+		} catch (_e) {}
 	});
 	
 	socalo.on("ping", function ping() {
