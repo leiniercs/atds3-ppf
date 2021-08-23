@@ -22,12 +22,12 @@ function validarLlaveAcceso(llave) {
 	const minutos = tiempoActual.getUTCMinutes();
 	const llaveAcceso = `${dia}${mes}${hora}${minutos}_ATDS3_82111232304_ATDS3_${dia}${mes}${hora}${minutos}`;
 	const hash = createHash('sha256');
-	
+
 	hash.update(llaveAcceso);
 	if (llave === hash.digest('hex')) {
 		return true;
 	}
-	
+
 	return false;
 }
 
