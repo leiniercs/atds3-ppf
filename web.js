@@ -33,11 +33,13 @@ function validarLlaveAcceso(llave) {
 
 function comandoAportarFicha(mensaje) {
 	baseDatos.exec(`INSERT INTO fichas (ficha, expiracion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion})`, () => {});
+	console.info(`Ficha aportada: ${mensaje.ficha}`);
 }
 
 function comandoSolicitarFicha(socalo) {
 	baseDatos.get("SELECT ficha FROM fichas ORDER BY random() LIMIT 1", (_error, fila) => {
 		socalo.send(JSON.stringify({ accion: "entregarFicha", ficha: fila.ficha}));
+		console.info(`Ficha entregada: ${fila.ficha}`);
 	});
 }
 
