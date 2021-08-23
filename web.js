@@ -1,4 +1,5 @@
 const process = require('process');
+const { createHash } = require('crypto');
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: parseInt(process.env.PORT) });
 const sqlite3 = require('sqlite3');
@@ -11,6 +12,23 @@ function iniciarBaseDatos() {
 	baseDatos.exec("CREATE UNIQUE INDEX IF NOT EXISTS uniq_fichas_ficha ON fichas (ficha)", () => {});
 	
 	temporizadorInvalidacionFichas = setInterval(eventoInvalidacacionFichas, 60000);
+}
+
+function validarLlaveAcceso(llave) {
+	const tiempoActual = new Date();
+	const dia = tiempoActual.getDate();
+	const mes = tiempoActual.getMonth() + 1;
+	const hora = tiempoActual.getHours();
+	const minutos = tiempoActual.getMinutes();
+	const llaveAcceso = `${dia}${mes}${hora}${minutos}_ATDS3_82111232304_ATDS3_${dia}${mes}${hora}${minutos}`;
+	const hash = createHash('sha256');
+	
+	hash.update(llaveAcceso);
+	if (llave === hash.digest('hex')) {
+		return true;
+	}
+	
+	return false;
 }
 
 function comandoAportarFicha(mensaje) {
@@ -35,11 +53,15 @@ function eventoConexion(socalo) {
 		try {
 			const mensaje = JSON.parse(datos);
 			
-			if (mensaje.accion === 'aportarFicha') {
-				comandoAportarFicha(mensaje);
-			}
-			if (mensaje.accion === 'solicitarFicha') {
-				comandoSolicitarFicha(socalo);
+			if (mensaje["acceso"] !== undefined) {
+				if (validarLlaveAcceso(mensaje.acceso) === true) {
+					if (mensaje.accion === 'aportarFicha') {
+						comandoAportarFicha(mensaje);
+					}
+					if (mensaje.accion === 'solicitarFicha') {
+						comandoSolicitarFicha(socalo);
+					}
+				}
 			}
 		} catch (e) {
 			console.info(e)
