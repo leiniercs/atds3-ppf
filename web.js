@@ -16,10 +16,10 @@ function iniciarBaseDatos() {
 
 function validarLlaveAcceso(llave) {
 	const tiempoActual = new Date();
-	const dia = tiempoActual.getDate();
-	const mes = tiempoActual.getMonth() + 1;
-	const hora = tiempoActual.getHours();
-	const minutos = tiempoActual.getMinutes();
+	const dia = tiempoActual.getUTCDate();
+	const mes = tiempoActual.getUTCMonth() + 1;
+	const hora = tiempoActual.getUTCHours();
+	const minutos = tiempoActual.getUTCMinutes();
 	const llaveAcceso = `${dia}${mes}${hora}${minutos}_ATDS3_82111232304_ATDS3_${dia}${mes}${hora}${minutos}`;
 	const hash = createHash('sha256');
 	
