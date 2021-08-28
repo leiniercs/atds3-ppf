@@ -8,7 +8,7 @@ let temporizadorInvalidacionFichas;
 
 
 function iniciarBaseDatos() {
-	baseDatos.exec("CREATE TABLE IF NOT EXISTS fichas (id INTEGER PRIMARY KEY AUTOINCREMENT, ficha TEXT NOT NULL, expiracion INTEGER NOT NULL)", () => {});
+	baseDatos.exec("CREATE TABLE IF NOT EXISTS fichas (id INTEGER PRIMARY KEY AUTOINCREMENT, ficha TEXT NOT NULL, expiracion INTEGER NOT NULL, solo_publicacion BOOLEAN NOT NULL)", () => {});
 	baseDatos.exec("CREATE UNIQUE INDEX IF NOT EXISTS uniq_fichas_ficha ON fichas (ficha)", () => {});
 	
 	temporizadorInvalidacionFichas = setInterval(eventoInvalidacacionFichas, 60000);
@@ -32,14 +32,14 @@ function validarLlaveAcceso(llave) {
 }
 
 function comandoAportarFicha(mensaje) {
-	baseDatos.exec(`INSERT INTO fichas (ficha, expiracion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion})`, () => {});
-	console.info(`Ficha aportada: ${mensaje.ficha}`);
+	baseDatos.exec(`INSERT INTO fichas (ficha, expiracion, solo_publicacion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion}, ${(mensaje['solo_publicacion'] === undefined ? false : mensaje.solo_publicacion)})`, () => {});
+	console.info(`Ficha aportada: ${mensaje.ficha}${(mensaje['solo_publicacion'] === undefined ? '' : `; Solo publicacion: ${mensaje.solo_publicacion}`)}`);
 }
 
-function comandoSolicitarFicha(socalo) {
-	baseDatos.get("SELECT ficha FROM fichas ORDER BY random() LIMIT 1", (_error, fila) => {
+function comandoSolicitarFicha(socalo, publicacion) {
+	baseDatos.get(`SELECT ficha FROM fichas WHERE (solo_publicacion = ${publicacion}) ORDER BY random() LIMIT 1`, (_error, fila) => {
 		socalo.send(JSON.stringify({ accion: "entregarFicha", ficha: fila.ficha}));
-		console.info(`Ficha entregada: ${fila.ficha}`);
+		console.info(`Ficha entregada: ${fila.ficha}; Publicación: ${publicacion}`);
 	});
 }
 
@@ -55,13 +55,13 @@ function eventoConexion(socalo) {
 		try {
 			const mensaje = JSON.parse(datos);
 			
-			if (mensaje["acceso"] !== undefined) {
+			if (mensaje['acceso'] !== undefined) {
 				if (validarLlaveAcceso(mensaje.acceso) === true) {
 					if (mensaje.accion === 'aportarFicha') {
 						comandoAportarFicha(mensaje);
 					}
 					if (mensaje.accion === 'solicitarFicha') {
-						comandoSolicitarFicha(socalo);
+						comandoSolicitarFicha(socalo, (mensaje['publicacion'] === undefined ? false : mensaje.publicacion));
 					}
 				}
 			}
