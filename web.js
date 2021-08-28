@@ -35,7 +35,13 @@ function comandoAportarFicha(mensaje) {
 	let soloPublicacion = false;
 	
 	if (mensaje['solo_publicacion'] !== undefined) {
-		soloPublicacion = mensaje.solo_publicacion;
+		if (mensaje.solo_publicacion === 'false') {
+			soloPublicacion = false;
+		} else if (mensaje.solo_publicacion === 'true') {
+			soloPublicacion = true;
+		} else {
+			soloPublicacion = mensaje.solo_publicacion;
+		}
 	}
 	
 	baseDatos.exec(`INSERT INTO fichas (ficha, expiracion, solo_publicacion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion}, ${soloPublicacion})`, () => {});
