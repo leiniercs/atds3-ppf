@@ -45,7 +45,12 @@ function comandoAportarFicha(mensaje) {
 	}
 	
 	baseDatos.exec(`INSERT INTO fichas (ficha, expiracion, solo_publicacion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion}, ${soloPublicacion})`, () => {});
-	console.info(`Ficha aportada: ${mensaje.ficha}; Solo publicacion: ${(soloPublicacion === false ? 'No' : 'Si')}`);
+	
+	if (soloPublicacion === true) {
+		console.info(`Ficha aportada: ${mensaje.ficha}; Solo publicacion: ${(soloPublicacion === false ? 'No' : 'Si')}`);
+	} else {
+		console.info(`Ficha aportada: ${mensaje.ficha}`);
+	}
 }
 
 function comandoSolicitarFicha(socalo, publicacion) {
