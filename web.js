@@ -11,10 +11,6 @@ function iniciarBaseDatos() {
 	baseDatos.exec("CREATE TABLE IF NOT EXISTS fichas (id INTEGER PRIMARY KEY AUTOINCREMENT, ficha TEXT NOT NULL, expiracion INTEGER NOT NULL, solo_publicacion BOOLEAN NOT NULL)", () => {});
 	baseDatos.exec("CREATE UNIQUE INDEX IF NOT EXISTS uniq_fichas_ficha ON fichas (ficha)", () => {});
 	
-	baseDatos.get(`SELECT COUNT(id) AS total FROM fichas`, (_error, fila) => {
-		console.info(`Total de fichas: ${fila.total}`);
-	});
-	
 	temporizadorInvalidacionFichas = setInterval(eventoInvalidacacionFichas, 60000);
 }
 
@@ -39,32 +35,29 @@ function comandoAportarFicha(mensaje) {
 	let soloPublicacion = false;
 	
 	if (mensaje['solo_publicacion'] !== undefined) {
-		if (mensaje.solo_publicacion === 'false') {
-			soloPublicacion = false;
-		} else if (mensaje.solo_publicacion === 'true') {
-			soloPublicacion = true;
-		} else {
-			try {
-				console.info(`${typeof mensaje.solo_publicacion} - ${mensaje.solo_publicacion.length} - ''${mensaje.solo_publicacion}'`);
-			} catch (e) {}
-			
-			soloPublicacion = mensaje.solo_publicacion;
-		}
+		soloPublicacion = mensaje.solo_publicacion;
 	}
 	
 	baseDatos.exec(`INSERT INTO fichas (ficha, expiracion, solo_publicacion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion}, ${soloPublicacion})`, () => {});
-	
+/*	
 	if (soloPublicacion === true) {
-//		console.info(`Ficha aportada: ${mensaje.ficha}; Solo publicacion: ${(soloPublicacion === false ? 'No' : 'Si')}`);
+		console.info(`Ficha aportada: ${mensaje.ficha}; Solo publicacion: ${(soloPublicacion === false ? 'No' : 'Si')}`);
 	} else {
-//		console.info(`Ficha aportada: ${mensaje.ficha}`);
+		console.info(`Ficha aportada: ${mensaje.ficha}`);
 	}
+*/
 }
 
 function comandoSolicitarFicha(socalo, publicacion) {
 	baseDatos.get(`SELECT ficha FROM fichas WHERE (solo_publicacion = ${publicacion}) ORDER BY random() LIMIT 1`, (_error, fila) => {
 		socalo.send(JSON.stringify({ accion: "entregarFicha", ficha: fila.ficha}));
-//		console.info(`Ficha entregada: ${fila.ficha}; Publicacion: ${publicacion}`);
+/*
+		if (publicacion === true) {
+			console.info(`Ficha entregada: ${fila.ficha}; Publicacion: Si`);
+		} else {
+			console.info(`Ficha entregada: ${fila.ficha}`);
+		}
+*/
 	});
 }
 
