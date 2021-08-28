@@ -40,6 +40,10 @@ function comandoAportarFicha(mensaje) {
 		} else if (mensaje.solo_publicacion === 'true') {
 			soloPublicacion = true;
 		} else {
+			try {
+				console.info(`${typeof mensaje.solo_publicacion} - ${mensaje.solo_publicacion.length} - ''${mensaje.solo_publicacion}'`);
+			} catch (e) {}
+			
 			soloPublicacion = mensaje.solo_publicacion;
 		}
 	}
@@ -47,9 +51,9 @@ function comandoAportarFicha(mensaje) {
 	baseDatos.exec(`INSERT INTO fichas (ficha, expiracion, solo_publicacion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion}, ${soloPublicacion})`, () => {});
 	
 	if (soloPublicacion === true) {
-		console.info(`Ficha aportada: ${mensaje.ficha}; Solo publicacion: ${(soloPublicacion === false ? 'No' : 'Si')}`);
+//		console.info(`Ficha aportada: ${mensaje.ficha}; Solo publicacion: ${(soloPublicacion === false ? 'No' : 'Si')}`);
 	} else {
-		console.info(`Ficha aportada: ${mensaje.ficha}`);
+//		console.info(`Ficha aportada: ${mensaje.ficha}`);
 	}
 }
 
