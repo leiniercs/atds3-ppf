@@ -11,6 +11,10 @@ function iniciarBaseDatos() {
 	baseDatos.exec("CREATE TABLE IF NOT EXISTS fichas (id INTEGER PRIMARY KEY AUTOINCREMENT, ficha TEXT NOT NULL, expiracion INTEGER NOT NULL, solo_publicacion BOOLEAN NOT NULL)", () => {});
 	baseDatos.exec("CREATE UNIQUE INDEX IF NOT EXISTS uniq_fichas_ficha ON fichas (ficha)", () => {});
 	
+	baseDatos.get(`SELECT COUNT(id) AS total FROM fichas`, (_error, fila) => {
+		console.info(`Total de fichas: ${fila.total}`);
+	});
+	
 	temporizadorInvalidacionFichas = setInterval(eventoInvalidacacionFichas, 60000);
 }
 
@@ -60,7 +64,7 @@ function comandoAportarFicha(mensaje) {
 function comandoSolicitarFicha(socalo, publicacion) {
 	baseDatos.get(`SELECT ficha FROM fichas WHERE (solo_publicacion = ${publicacion}) ORDER BY random() LIMIT 1`, (_error, fila) => {
 		socalo.send(JSON.stringify({ accion: "entregarFicha", ficha: fila.ficha}));
-		console.info(`Ficha entregada: ${fila.ficha}; Publicacion: ${publicacion}`);
+//		console.info(`Ficha entregada: ${fila.ficha}; Publicacion: ${publicacion}`);
 	});
 }
 
