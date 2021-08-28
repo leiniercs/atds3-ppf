@@ -32,14 +32,20 @@ function validarLlaveAcceso(llave) {
 }
 
 function comandoAportarFicha(mensaje) {
-	baseDatos.exec(`INSERT INTO fichas (ficha, expiracion, solo_publicacion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion}, ${(mensaje['solo_publicacion'] === undefined ? false : mensaje.solo_publicacion)})`, () => {});
-	console.info(`Ficha aportada: ${mensaje.ficha}${(mensaje['solo_publicacion'] === undefined ? '' : `; Solo publicacion: ${mensaje.solo_publicacion}`)}`);
+	let soloPublicacion = false;
+	
+	if (mensaje['solo_publicacion'] !== undefined) {
+		soloPublicacion = mensaje.solo_publicacion;
+	}
+	
+	baseDatos.exec(`INSERT INTO fichas (ficha, expiracion, solo_publicacion) VALUES ('${mensaje.ficha}', ${mensaje.expiracion}, ${soloPublicacion})`, () => {});
+	console.info(`Ficha aportada: ${mensaje.ficha}; Solo publicacion: ${(soloPublicacion === false ? 'No' : 'Si')}`);
 }
 
 function comandoSolicitarFicha(socalo, publicacion) {
 	baseDatos.get(`SELECT ficha FROM fichas WHERE (solo_publicacion = ${publicacion}) ORDER BY random() LIMIT 1`, (_error, fila) => {
 		socalo.send(JSON.stringify({ accion: "entregarFicha", ficha: fila.ficha}));
-		console.info(`Ficha entregada: ${fila.ficha}; Publicación: ${publicacion}`);
+		console.info(`Ficha entregada: ${fila.ficha}; Publicacion: ${publicacion}`);
 	});
 }
 
